@@ -24,7 +24,7 @@ Use --port 8766 to change the listening port, or --db "D:\Indexes\calls.sqlite3"
 
 ## Browser-only use
 
-Open dist/index.html in Chrome or Edge and choose the Call Recordings folder. This scans XML metadata in batches without loading WAV audio contents. Subfolders are included. Select the folder again after refreshing. Folder selection does not upload anything. Large folder enumeration and metadata searches depend on browser memory: use server.py for the full archive. The hosted version has the same folder mode. “Try sample metadata” works on the hosted/local-server version and shows three supplied sample conversations without audio. In a file:// page, the sample preview may be blocked by browser fetch rules; folder selection still works.
+Open dist/index.html in Chrome or Edge and choose the Call Recordings folder. This scans XML metadata in batches without loading WAV audio contents. Subfolders are included. Select the folder again after refreshing. Folder selection does not upload anything. Large folder enumeration and metadata searches depend on browser memory: use server.py for the full archive. The hosted version has the same folder mode. “Try sample metadata” works on the hosted/local-server version and shows three fictional demo conversations without audio. In a file:// page, the sample preview may be blocked by browser fetch rules; folder selection still works.
 
 ## Search
 
@@ -33,7 +33,7 @@ All filters combine with AND: free text across XML content, caller, called/DID, 
 ## Files and privacy
 
 - dist/index.html: complete standalone UI, no CDN or third-party scripts.
-- dist/sample-metadata.json: three sample conversation summaries (no WAV content).
+- dist/sample-metadata.json: three fictional demo conversation summaries (no WAV content).
 - server.py: incremental indexer, local API, CSV export and seekable WAV streaming.
 - archive-*.sqlite3: generated locally, contains sensitive searchable call metadata. Protect it like the recordings.
 
