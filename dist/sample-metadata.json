@@ -1,0 +1,59 @@
+[
+  {
+    "id": "demo-conversation-1",
+    "start": "2025-10-01 09:00:00",
+    "end": "2025-10-01 09:00:13",
+    "duration": 13000,
+    "direction": "INBOUND",
+    "caller": "2025550101",
+    "called": "2025550199",
+    "extensions": [
+      "1001"
+    ],
+    "agents": [
+      "5001"
+    ],
+    "xml": "demo-conversation-1.xml",
+    "audioName": "demo-conversation-1.wav",
+    "audio": null,
+    "text": "demo-conversation-1 2025-10-01 09:00:00 2025550101 2025550199 1001 5001 inbound fictional demo"
+  },
+  {
+    "id": "demo-conversation-2",
+    "start": "2025-10-01 10:00:00",
+    "end": "2025-10-01 10:02:17",
+    "duration": 137000,
+    "direction": "INBOUND",
+    "caller": "2025550102",
+    "called": "2025550199",
+    "extensions": [
+      "1002"
+    ],
+    "agents": [
+      "5002"
+    ],
+    "xml": "demo-conversation-2.xml",
+    "audioName": "demo-conversation-2.wav",
+    "audio": null,
+    "text": "demo-conversation-2 2025-10-01 10:00:00 2025550102 2025550199 1002 5002 inbound fictional demo"
+  },
+  {
+    "id": "demo-conversation-3",
+    "start": "2025-10-01 11:00:00",
+    "end": "2025-10-01 11:03:53",
+    "duration": 233000,
+    "direction": "INBOUND",
+    "caller": "2025550103",
+    "called": "2025550199",
+    "extensions": [
+      "1003"
+    ],
+    "agents": [
+      "5003"
+    ],
+    "xml": "demo-conversation-3.xml",
+    "audioName": "demo-conversation-3.wav",
+    "audio": null,
+    "text": "demo-conversation-3 2025-10-01 11:00:00 2025550103 2025550199 1003 5003 inbound fictional demo"
+  }
+]
