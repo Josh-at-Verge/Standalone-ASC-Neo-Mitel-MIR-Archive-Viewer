@@ -19,6 +19,10 @@ def init():
   c.execute('CREATE INDEX IF NOT EXISTS call_direction ON calls(direction,start)')
   c.create_function('digits',1,lambda x:re.sub(r'\D','',str(x or '')),deterministic=True)
 
+def mp3_name(name):
+ # Legacy XML exports and cached rows may still name a WAV file.
+ return Path(name.replace('\\','/')).with_suffix('.mp3').as_posix()
+
 def parse(path):
  data=path.read_bytes()
  if b'<!DOCTYPE' in data.upper() or b'<!ENTITY' in data.upper():raise ValueError('DTD/entity declarations are unsupported')
@@ -27,13 +31,13 @@ def parse(path):
  get=lambda tag:(r.findtext(tag) or '').strip()
  ext=sorted(set((x.text or '').strip() for x in r.findall('participants/extension/number'))|{get('firstConnectedNumber')})
  agents=sorted(set((x.text or '').strip() for x in r.findall('participants/pbxAgentID'))|{get('firstConnectedPbxAgentID')})
- return dict(id=get('id') or str(path.relative_to(ROOT)),start=get('starttime'),end=get('endtime'),duration=float(get('duration') or 0),direction=get('direction'),caller=get('callerNumber'),called=get('calledNumber'),extensions=json.dumps([x for x in ext if x]),agents=json.dumps([x for x in agents if x]),audioName=get('conversationFileName') or path.with_suffix('.wav').name,text=' '.join(' '.join(r.itertext()).split()).lower())
+ return dict(id=get('id') or str(path.relative_to(ROOT)),start=get('starttime'),end=get('endtime'),duration=float(get('duration') or 0),direction=get('direction'),caller=get('callerNumber'),called=get('calledNumber'),extensions=json.dumps([x for x in ext if x]),agents=json.dumps([x for x in agents if x]),audioName=mp3_name(get('conversationFileName') or path.name),text=' '.join(' '.join(r.itertext()).split()).lower())
 
 def scan():
  errors=[]
  try:
-  STATE.update(message='Discovering XML and WAV files…',errors='')
-  xml=[];names={};waves=set()
+  STATE.update(message='Discovering XML and MP3 files…',errors='')
+  xml=[];names={};audio_files=set();paths={}
   def fail(e):raise e
   for parent,dirs,fs in os.walk(ROOT,onerror=fail,followlinks=False):
    dirs[:]=[d for d in dirs if not Path(parent,d).is_symlink()]
@@ -42,8 +46,9 @@ def scan():
     if p.is_symlink():continue
     rel=p.relative_to(ROOT).as_posix()
     if p.suffix.lower()=='.xml':xml.append((p,rel))
-    elif p.suffix.lower()=='.wav':
-     waves.add(rel);key=name.lower();names[key]=None if key in names else rel
+    elif p.suffix.lower()=='.mp3':
+     audio_files.add(rel);key=name.lower();names[key]=None if key in names else rel
+     key=rel.lower();paths[key]=None if key in paths else rel
   with connect() as c:
    old={r['xml']:(r['mtime'],r['size']) for r in c.execute('SELECT xml,mtime,size FROM calls')}
    seen=set()
@@ -52,13 +57,13 @@ def scan():
     try:
      s=p.stat()
      if old.get(rel)==(s.st_mtime_ns,s.st_size):
-      r=c.execute('SELECT audioName FROM calls WHERE xml=?',(rel,)).fetchone();audio_name=r[0]
+      r=c.execute('SELECT audioName FROM calls WHERE xml=?',(rel,)).fetchone();audio_name=mp3_name(r[0])
      else:
       r=parse(p);audio_name=r['audioName'];r.update(xml=rel,mtime=s.st_mtime_ns,size=s.st_size,audio=None)
       cols=list(r);c.execute('INSERT OR REPLACE INTO calls ('+','.join(cols)+') VALUES ('+','.join('?' for _ in cols)+')',[r[k] for k in cols])
      exact=(Path(rel).parent/Path(audio_name.replace('\\','/'))).as_posix()
-     audio=exact if exact in waves else names.get(Path(audio_name.replace('\\','/')).name.lower())
-     c.execute('UPDATE calls SET audio=? WHERE xml=?',(audio,rel))
+     audio=exact if exact in audio_files else paths.get(exact.lower()) or names.get(Path(audio_name).name.lower())
+     c.execute('UPDATE calls SET audio=?,audioName=? WHERE xml=?',(audio,audio_name,rel))
     except Exception as e:
      errors.append(f'{rel}: {e}');c.execute('DELETE FROM calls WHERE xml=?',(rel,))
     if i%250==0:
@@ -144,7 +149,7 @@ class Handler(BaseHTTPRequestHandler):
    if not r or not r[0]:return self.output({'error':'No matching audio'},404)
    p=(ROOT/r[0]).resolve()
    if not p.is_relative_to(ROOT) or not p.is_file():return self.output({'error':'Audio no longer available'},404)
-   return self.serve_file(p,'audio/wav',ranges=True)
+   return self.serve_file(p,'audio/mpeg',ranges=True)
   static={'/':'index.html','/index.html':'index.html','/sample-metadata.json':'sample-metadata.json'}
   if url.path not in static:return self.output({'error':'Not found'},404)
   p=BASE/'dist'/static[url.path];return self.serve_file(p,mimetypes.guess_type(str(p))[0] or 'application/octet-stream')
@@ -170,7 +175,7 @@ class Handler(BaseHTTPRequestHandler):
     self.wfile.write(data);left-=len(data)
 
 if __name__=='__main__':
- ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('recordings',help='Root folder containing exported XML and WAV files');ap.add_argument('--port',type=int,default=8765);ap.add_argument('--db',help='SQLite index location (default: beside server, unique per archive)');a=ap.parse_args();ROOT=Path(a.recordings).expanduser().resolve()
+ ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('recordings',help='Root folder containing exported XML and MP3 files');ap.add_argument('--port',type=int,default=8765);ap.add_argument('--db',help='SQLite index location (default: beside server, unique per archive)');a=ap.parse_args();ROOT=Path(a.recordings).expanduser().resolve()
  if not ROOT.is_dir():ap.error('Recordings folder does not exist')
  import hashlib
  DB=Path(a.db).resolve() if a.db else BASE/('archive-'+hashlib.sha256(str(ROOT).encode()).hexdigest()[:12]+'.sqlite3')
