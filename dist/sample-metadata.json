@@ -14,7 +14,7 @@
       "5001"
     ],
     "xml": "demo-conversation-1.xml",
-    "audioName": "demo-conversation-1.wav",
+    "audioName": "demo-conversation-1.mp3",
     "audio": null,
     "text": "demo-conversation-1 2025-10-01 09:00:00 2025550101 2025550199 1001 5001 inbound fictional demo"
   },
@@ -33,7 +33,7 @@
       "5002"
     ],
     "xml": "demo-conversation-2.xml",
-    "audioName": "demo-conversation-2.wav",
+    "audioName": "demo-conversation-2.mp3",
     "audio": null,
     "text": "demo-conversation-2 2025-10-01 10:00:00 2025550102 2025550199 1002 5002 inbound fictional demo"
   },
@@ -52,7 +52,7 @@
       "5003"
     ],
     "xml": "demo-conversation-3.xml",
-    "audioName": "demo-conversation-3.wav",
+    "audioName": "demo-conversation-3.mp3",
     "audio": null,
     "text": "demo-conversation-3 2025-10-01 11:00:00 2025550103 2025550199 1003 5003 inbound fictional demo"
   }
