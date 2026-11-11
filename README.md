@@ -6,6 +6,11 @@ A small HTML recording browser for Mitel conversation XML + MP3 exports.
 
 Put your XML and MP3 files inside the Recordings folder beside Start_Call_Archive.bat. Double-click Start_Call_Archive.bat to start the local server and open your browser automatically. Requires Python 3.10+. Keep the server window open; press Ctrl+C to stop it.
 
+1. Download and Extract the Archive. You need about 350gb of free space. The Archive is 109GB, extracts to 200GB.
+2. Install Python 3.14.10
+3. Launch the server using  Start_Call_Archive.bat
+4. The Batch File will automatically launch the web interface.  http://127.0.0.1:8765
+
 Python Download https://www.python.org/downloads/
 
 ## Recommended: persistent archive (11 months)
